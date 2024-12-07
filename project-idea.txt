@@ -1,0 +1,96 @@
+Online Food Delivery System - Detailed Description
+====================================================
+
+------------------
+Project Overview:
+------------------
+The Online Food Delivery System simulates a platform where multiple customers place orders,
+and delivery agents fulfill them concurrently. It handles tasks like processing orders,
+managing delivery agents, and providing real-time status updates while ensuring thread safety
+and efficient resource utilization.
+
+----------------
+Key Components:
+----------------
+Customer Threads:
+Each customer represents a thread that places an order.
+The order contains details like customer ID, restaurant name, food items, and delivery address.
+
+Restaurant Module:
+Simulates food preparation time for each order.
+Uses ExecutorService to handle multiple orders concurrently for a single restaurant.
+
+Delivery Agent Pool:
+A pool of delivery agents represented by a Semaphore to limit the number of active agents.
+Agents are assigned to orders in a thread-safe manner, ensuring no two threads can assign the same
+agent simultaneously.
+
+Order Queue:
+A shared queue (e.g., BlockingQueue) stores orders waiting to be processed by the delivery system.
+
+Uses the producer-consumer pattern:
+Customers act as producers, placing orders into the queue.
+Delivery agents act as consumers, picking up orders for delivery.
+
+Order Status Management:
+Each order has a status (PLACED, PREPARED, OUT_FOR_DELIVERY, DELIVERED).
+Uses Condition to notify the system when an order transitions between statuses (e.g., prepared -> out for delivery).
+
+Logger Thread:
+A separate thread maintains logs for all order-related activities (e.g., order placed, assigned to an agent, delivered).
+Implements asynchronous logging to avoid blocking other threads.
+
+----------------------
+Concurrency Features:
+----------------------
+Thread-Safe Order Management:
+Shared resources (e.g., order queue, delivery agents) are accessed using synchronized or ReentrantLock to prevent race conditions.
+Fine-grained locking ensures optimal concurrency without bottlenecks.
+
+Semaphore for Resource Limitation:
+Controls the number of active delivery agents at any time.
+Agents acquire a permit before starting a delivery and release it after completion.
+
+Condition for Order Status Updates:
+Ensures that dependent tasks (e.g., assigning a delivery agent only after food preparation) proceed in the correct order.
+
+Producer-Consumer Coordination:
+Uses BlockingQueue for seamless order queuing and processing.
+The queue ensures efficient handling of multiple orders without busy waiting.
+
+Thread Pool for Scalability:
+Uses ExecutorService to process multiple tasks like food preparation and delivery concurrently, reducing thread management overhead.
+
+----------
+Workflow:
+----------
+Order Placement:
+A customer thread places an order in the order queue.
+Logs the activity (e.g., "Order #123 placed by Customer A").
+
+Food Preparation:
+Restaurant threads pick orders from the queue.
+Simulates preparation time (e.g., using Thread.sleep) and updates the order status to PREPARED.
+
+Delivery Assignment:
+Once prepared, an order is assigned to an available delivery agent (uses Semaphore to manage agent availability).
+Logs the activity (e.g., "Order #123 assigned to Agent X").
+
+Order Delivery:
+Delivery agents deliver orders (simulated with a delay) and update the order status to DELIVERED.
+Logs the completion (e.g., "Order #123 delivered to Customer A").
+
+---------------------------
+Potential Features to Add:
+---------------------------
+Real-Time Tracking:
+Notify customers of their order status using a volatile variable or Condition.
+
+Surge Pricing Simulation:
+Adjust delivery times or costs dynamically based on active order volumes.
+
+Error Handling:
+Handle scenarios like agent unavailability, order cancellation, or restaurant closure.
+
+Performance Metrics:
+Measure throughput (orders processed per second) and log performance data.
